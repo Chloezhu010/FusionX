@@ -1,4 +1,4 @@
-# FusionX - Cross-Chain USDC Swaps
+# FusionX - 1inch Fusion+ cross-chain swap implementation
 
 **FusionX** enables atomic swaps of USDC between Ethereum and XRPL using smart contracts and cryptographic secrets to ensure security and atomicity.
 
