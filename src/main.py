@@ -110,7 +110,7 @@ async def example_eth_to_xrpl_swap():
             'order_hash': order_hash,
             'eth_user': example_user,
             'xrpl_user': example_xrpl_user,
-            'eth_usdc_address': ETH_USDC_ADDRESS,
+            'ETH_USDC_ADDRESS': ETH_USDC_ADDRESS,
             'eth_amount': eth_amount_to_swap,
             'xrpl_amount': xrpl_amount_str,
             'safety_deposit': int(0.01 * 10**18),  # 0.01 ETH safety deposit
@@ -254,7 +254,7 @@ async def interactive_swap():
             'order_hash': order_hash,
             'eth_user': eth_user,
             'xrpl_user': xrpl_user,
-            'eth_usdc_address': ETH_USDC_ADDRESS,
+            'ETH_USDC_ADDRESS': ETH_USDC_ADDRESS,
             'eth_amount': eth_amount,
             'xrpl_amount': xrpl_amount_str,
             'safety_deposit': int(0.01 * 10**18),
