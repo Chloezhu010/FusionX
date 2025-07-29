@@ -1,4 +1,4 @@
-# FusionX: ETH Sepolia <> XRPL Testnet Cross-Chain Swap
+# FusionX: ETH <> XRPL Cross-Chain Swap
 
 This project implements cross-chain swaps between Ethereum Sepolia testnet and XRPL testnet using escrow contracts and XRPL bridge functionality.
 
