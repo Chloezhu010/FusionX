@@ -104,13 +104,17 @@ class UsdcCrossChainResolver:
             current_time = int(time.time())
             withdrawal_time = swap['order']['timelocks']['src_withdrawal']
             
+            print(f"⏰ Current time: {current_time}")
+            print(f"⏰ Withdrawal time: {withdrawal_time}")
+            print(f"⏰ Time difference: {withdrawal_time - current_time} seconds")
+            
             if current_time < withdrawal_time:
-                wait_seconds = withdrawal_time - current_time
-                # Increase wait time to be safely longer than block time
-                final_wait = max(wait_seconds, 0) + 35 
-                print(f"⏳ Waiting {final_wait} seconds for withdrawal timelock...")
-                await asyncio.sleep(final_wait)
+                wait_seconds = withdrawal_time - current_time + 10  # Add 10 seconds buffer
+                print(f"⏳ Waiting {wait_seconds} seconds for withdrawal timelock...")
+                await asyncio.sleep(wait_seconds)
                 print("✅ Timelock period completed")
+            else:
+                print("✅ Timelock already expired, proceeding with withdrawal")
             
             # In a real implementation, we would wait for user to reveal secret
             # through XRPL transaction or off-chain communication
