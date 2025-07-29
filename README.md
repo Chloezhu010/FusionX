@@ -69,6 +69,10 @@ pnpm test tests/eth-xrpl.spec.ts
 pnpm test
 ```
 
+### TODO
+- only support eth on sepolia to xrp on xrpl testnet
+- currently hard coded exchange rate
+
 ## 🏗️ Architecture
 
 ### Core Components
