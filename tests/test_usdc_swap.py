@@ -57,14 +57,15 @@ class TestUsdcSwap:
             'order_hash': order_hash,
             'eth_user': '0x742d35Cc6634C0532925a3b8D0C0c0002e0Fd4f25',
             'xrpl_user': 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
-            'eth_amount': 100_000_000,  # 100 USDC
-            'xrpl_amount': '99.000000', # 99 USDC
+            'eth_amount': 100_000,
+            'xrpl_amount': '0.099000',
             'safety_deposit': int(0.01 * 10**18),  # 0.01 ETH
+            'ETH_USDC_ADDRESS': '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',  # Mock USDC address
             'timelocks': {
-                'src_withdrawal': current_time + 600,     # 10 minutes
-                'src_cancellation': current_time + 7200,  # 2 hours
-                'dst_withdrawal': current_time + 300,     # 5 minutes
-                'dst_cancellation': current_time + 3600   # 1 hour
+                'src_withdrawal': current_time + 15,
+                'src_cancellation': current_time + 10,
+                'dst_withdrawal': current_time + 15,
+                'dst_cancellation': current_time + 10
             }
         }
     
@@ -189,8 +190,8 @@ class TestUsdcSwap:
         assert order_hash_hex in pending
         swap_info = pending[order_hash_hex]
         assert swap_info['status'] == 'awaiting_user_validation'
-        assert swap_info['eth_amount'] == 100.0  # 100 USDC
-        assert swap_info['xrpl_amount'] == '99.000000'
+        assert swap_info['eth_amount'] == 0.1  # 100 USDC
+        assert swap_info['xrpl_amount'] == '0.099000'
         assert swap_info['eth_user'] == sample_order['eth_user']
         assert swap_info['xrpl_user'] == sample_order['xrpl_user']
 
@@ -332,11 +333,12 @@ class TestIntegration:
             'eth_amount': 100_000_000,
             'xrpl_amount': '99.000000',
             'safety_deposit': int(0.01 * 10**18),
+            'ETH_USDC_ADDRESS': '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',  # Mock USDC address
             'timelocks': {
-                'src_withdrawal': int(time.time()) + 600,
-                'src_cancellation': int(time.time()) + 7200,
-                'dst_withdrawal': int(time.time()) + 300,
-                'dst_cancellation': int(time.time()) + 3600
+                'src_withdrawal': int(time.time()) + 15,
+                'src_cancellation': int(time.time()) + 10,
+                'dst_withdrawal': int(time.time()) + 15,
+                'dst_cancellation': int(time.time()) + 10
             }
         }
         

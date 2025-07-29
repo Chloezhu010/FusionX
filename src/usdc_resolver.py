@@ -4,6 +4,7 @@ import secrets
 import hashlib
 from decimal import Decimal
 import time
+from dotenv import load_dotenv
 
 class UsdcCrossChainResolver:
     def __init__(self, eth_manager, xrpl_manager):
@@ -34,7 +35,7 @@ class UsdcCrossChainResolver:
                 'maker': order['eth_user'],
                 'taker': self.eth_manager.account.address,  # Resolver is the taker
                 'xrpl_destination': order['xrpl_user'],
-                'usdc_token': order['eth_usdc_address'],
+                'usdc_token': order['ETH_USDC_ADDRESS'],
                 'amount': order['eth_amount'],  # e.g., 100000000 (100 USDC)
                 'safety_deposit': order['safety_deposit'],
                 'xrpl_currency': 'USD',

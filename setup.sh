@@ -1,9 +1,9 @@
 #!/bin/bash
-# setup.sh - Xinch Project Setup Script
+# setup.sh - FusionX Project Setup Script
 
 set -e  # Exit on any error
 
-echo "🚀 Xinch Setup Script"
+echo "🚀 FusionX Setup Script"
 echo "====================="
 echo "Setting up cross-chain USDC swap environment..."
 echo
@@ -160,7 +160,7 @@ if [[ ! -f ".env" ]]; then
     else
         # Create a basic .env file
         cat > .env << 'EOF'
-# Xinch Configuration
+# FusionX Configuration
 # Edit these values with your actual credentials
 
 # Ethereum Configuration (Sepolia testnet)
