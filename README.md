@@ -1,411 +1,275 @@
-# FusionX - 1inch Fusion+ cross-chain swap implementation
+# ETH Sepolia ↔ XRPL Testnet Cross-Chain Swap
 
-**FusionX** enables atomic swaps of USDC between Ethereum and XRPL using smart contracts and cryptographic secrets to ensure security and atomicity.
+A cross-chain swap implementation that enables asset transfers between Ethereum Sepolia testnet and XRPL testnet, using 1inch's Limit Order Protocol (LOP) for real market exchange rates.
 
-## 🚀 Features
+## Features
 
-- ✅ **Atomic Swaps** - Either both sides complete or both fail
-- ✅ **USDC Support** - Swap USDC between Ethereum and XRPL
-- ✅ **Security** - Uses hash-time-locked contracts (HTLCs) and safety deposits
-- ✅ **Partial Fills** - Support for partial order execution
-- ✅ **Cancellation** - Built-in timeout and cancellation mechanisms
-- ✅ **Testing** - Comprehensive test suite with mocked components
+- **Cross-Chain Transfers**: ETH ↔ XRP swaps between Ethereum Sepolia and XRPL testnet
+- **Real Market Rates**: Integration with 1inch's Limit Order Protocol for accurate exchange rates
+- **Fallback Rates**: Hardcoded rates when LOP is unavailable
+- **XRPL Integration**: Direct interaction with XRPL testnet
+- **Proof Generation**: Cryptographic proofs for cross-chain verification
+- **Rate Caching**: Performance optimization with 1-minute rate caching
 
-## 🏗️ Architecture
+## Architecture
+
+### Exchange Rate Sources (Priority Order)
+
+1. **1inch Limit Order Protocol (LOP)** - Primary source for real market rates
+2. **Hardcoded Rates** - Fallback when LOP is unavailable
+3. **Rate Caching** - 1-minute cache for performance
+
+### Cross-Chain Flow
 
 ```
-┌─────────────────────┐    ┌─────────────────────┐
-│   Ethereum (ETH)    │    │      XRPL           │
-│                     │    │                     │
-│  ┌───────────────┐  │    │  ┌───────────────┐  │
-│  │ USDC Escrow   │  │◄──►│  │ USDC Payment  │  │
-│  │ Contract      │  │    │  │ Transaction   │  │
-│  └───────────────┘  │    │  └───────────────┘  │
-│                     │    │                     │
-│ User deposits USDC  │    │ Resolver sends     │
-│ + Safety deposit    │    │ USDC to user      │
-└─────────────────────┘    └─────────────────────┘
-           ▲                           ▲
-           │                           │
-           └──────── Resolver ─────────┘
-           (Facilitates the swap)
+ETH Sepolia → XRPL Testnet:
+1. User initiates swap on Ethereum
+2. Resolver contract creates escrow
+3. LOP provides real market rate
+4. XRPL bridge executes transfer
+5. User receives XRP on XRPL
+
+XRPL Testnet → ETH Sepolia:
+1. User sends XRP to resolver
+2. Proof generated for XRPL transaction
+3. Resolver verifies proof on Ethereum
+4. User receives ETH on Sepolia
 ```
 
-## 📋 Prerequisites
-
-- **Python 3.8+**
-- **Node.js** (for XRPL connections)
-- **Foundry** (for smart contract compilation)
-- **Git**
-
-## 🛠️ Installation
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Chloezhu010/FusionX.git
-cd FusionX
-```
-
-### 2. Install Dependencies
-```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Install Foundry (for smart contracts)
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-```
-
-### 3. Install OpenZeppelin Contracts
-```bash
-# Install OpenZeppelin contracts for Solidity
-forge install OpenZeppelin/openzeppelin-contracts
-```
-
-### 4. Compile Smart Contracts
-```bash
-forge build
-```
-
-### 5. Set Up Environment Variables
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit .env with your actual values
-nano .env
-```
-
-Example `.env` configuration:
-```env
-# Ethereum Configuration (Use Sepolia testnet for testing)
-ETH_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID
-ETH_PRIVATE_KEY=0xYOUR_ETHEREUM_PRIVATE_KEY_HERE
-ESCROW_CONTRACT_ADDRESS=0xYOUR_DEPLOYED_CONTRACT_ADDRESS
-
-# XRPL Configuration (Use testnet for testing)
-XRPL_RPC_URL=wss://s.altnet.rippletest.net:51233
-XRPL_WALLET_SEED=sYOUR_XRPL_WALLET_SEED_HERE
-
-# Token Addresses
-ETH_USDC_ADDRESS=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-XRPL_USDC_ISSUER=rcEGREd5YGXK2grCkeSNRZm2Diq1Hp5jk
-```
-
-## 🚀 Quick Start
-
-### 1. Deploy Smart Contracts
-```bash
-python scripts/deploy.py
-```
-
-This will:
-- Deploy a mock XRPL oracle
-- Deploy the USDC escrow contract
-- Save deployment info to `deployment.json`
-- Update your `.env` with the contract address
-
-### 2. Run Tests
-```bash
-# Run all tests
-python -m pytest tests/ -v
-
-# Run specific test file
-python -m pytest tests/test_usdc_swap.py -v
-```
-
-### 3. Check Balances
-```bash
-python src/main.py
-# Choose option 3: Check balances
-```
-
-### 4. Execute a Test Swap
-```bash
-python src/main.py
-# Choose option 1: Execute example ETH → XRPL swap
-```
-
-## 📖 Usage Guide
-
-### Basic Swap Flow
-
-1. **Create Order**: User creates a cross-chain swap order
-2. **Deploy Escrow**: Resolver deploys escrow on Ethereum with user's USDC
-3. **Send XRPL Payment**: Resolver sends USDC to user on XRPL
-4. **User Validation**: User validates XRPL payment off-chain
-5. **Secret Sharing**: User shares secret to complete swap
-6. **Withdrawal**: Resolver withdraws USDC from Ethereum escrow
-
-### Command Line Interface
+## Installation
 
 ```bash
-python src/main.py
+# Clone the repository
+git clone <repository-url>
+cd new_FusionX
+
+# Install dependencies
+pnpm install
+
+# Install XRPL SDK
+pnpm add xrpl
+
+# Build contracts
+pnpm run build
 ```
 
-Available options:
-- **1**: Execute example ETH → XRPL swap
-- **2**: Check swap status
-- **3**: Check account balances
-- **4**: Interactive swap creation
-- **5**: Show current configuration
-- **0**: Exit
+## Configuration
 
-### Interactive Swap Creation
+Create a `.env` file with the following variables:
 
-```bash
-python src/main.py
-# Choose option 4: Interactive swap creation
-
-# You'll be prompted for:
-# - ETH user address (0x...)
-# - XRPL user address (r...)
-# - USDC amount to swap
-# - Fee rate (e.g., 0.01 for 1%)
-```
-
-## 🧪 Testing
-
-### Unit Tests
-```bash
-# Run all tests
-python -m pytest tests/ -v
-
-# Run with coverage
-python -m pytest tests/ --cov=src --cov-report=html
-
-# Run specific test class
-python -m pytest tests/test_usdc_swap.py::TestUsdcSwap -v
-```
-
-### Integration Tests
-```bash
-# Run integration tests (requires deployed contracts)
-python -m pytest tests/test_usdc_swap.py::TestIntegration -v
-```
-
-### Manual Testing
-
-1. **Balance Checking**:
-```bash
-python src/main.py  # Option 3
-```
-
-2. **Contract Deployment**:
-```bash
-python scripts/deploy.py
-```
-
-3. **Swap Execution**:
-```bash
-python src/main.py  # Option 1 or 4
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ETH_RPC_URL` | Ethereum RPC endpoint | `https://sepolia.infura.io/v3/...` |
-| `ETH_PRIVATE_KEY` | Ethereum private key | `0x1234...` |
-| `ESCROW_CONTRACT_ADDRESS` | Deployed escrow contract | `0xabcd...` |
-| `XRPL_RPC_URL` | XRPL RPC endpoint | `wss://s.altnet.rippletest.net:51233` |
-| `XRPL_WALLET_SEED` | XRPL wallet seed | `sXXXXXXXXXXXXXXXX` |
-| `ETH_USDC_ADDRESS` | USDC contract on the network | `0x94a9D9...` (Sepolia) |
-| `XRPL_USDC_ISSUER` | USDC issuer on XRPL | (Find a valid testnet issuer) |
-
-### Network Configuration
-
-#### Testnets (Recommended for Development)
 ```env
 # Ethereum Sepolia
-ETH_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
-ETH_USDC_ADDRESS=0x1xxx...
+SRC_CHAIN_RPC=https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
+SRC_CHAIN_PRIVATE_KEY=your_ethereum_private_key
 
 # XRPL Testnet
-XRPL_RPC_URL=wss://s.altnet.rippletest.net:51233
+DST_CHAIN_RPC=wss://s.altnet.rippletest.net:51233
+DST_CHAIN_PRIVATE_KEY=your_xrpl_private_key
+
+# Optional: XRPL Seeds (for testing)
+XRPL_USER_SEED=your_xrpl_user_seed
+XRPL_RESOLVER_SEED=your_xrpl_resolver_seed
 ```
 
-#### Mainnets (Production)
-```env
-# Ethereum Mainnet
-ETH_RPC_URL=https://mainnet.infura.io/v3/YOUR_PROJECT_ID
-ETH_USDC_ADDRESS=0xA0...
+### LOP Configuration
 
-# XRPL Mainnet
-XRPL_RPC_URL=wss://xrplcluster.com
+The system automatically integrates with 1inch's Limit Order Protocol:
+
+```typescript
+// LOP contract addresses (mainnet)
+const LOP_ADDRESSES = {
+  ETHEREUM: '0x111111125421ca6dc452d289314280a0f8842a65',
+  BSC: '0x111111125421ca6dc452d289314280a0f8842a65',
+  // Add more chains as needed
+}
 ```
 
-## 📝 API Reference
+## Usage
 
-### UsdcCrossChainResolver
+### Running Tests
 
-Main class for executing cross-chain swaps.
+```bash
+# Run all tests
+pnpm test
 
-```python
-from src.usdc_resolver import UsdcCrossChainResolver
+# Run specific test file
+pnpm test tests/eth-xrpl.spec.ts
 
-resolver = UsdcCrossChainResolver(eth_manager, xrpl_manager)
-
-# Execute a swap
-result = await resolver.execute_usdc_swap(order)
-
-# Check swap status
-status = resolver.get_swap_status(order_hash)
-
-# Cancel a swap
-result = await resolver.cancel_swap(order_hash)
+# Run with specific environment variables
+SRC_CHAIN_RPC=https://eth.merkle.io DST_CHAIN_RPC=wss://s.altnet.rippletest.net:51233 pnpm test
 ```
 
-### EthEscrowManager
+### Exchange Rate Calculation
 
-Manages Ethereum escrow contracts.
+```typescript
+import { XrplBridge } from './src/xrpl/bridge'
 
-```python
-from src.eth_manager import EthEscrowManager
+const bridge = new XrplBridge(
+  'wss://s.altnet.rippletest.net:51233',
+  provider,
+  privateKey,
+  lopAddress,
+  lopABI
+)
 
-eth_manager = EthEscrowManager(rpc_url, private_key, contract_address)
+// Get real market rate from LOP
+const rate = await bridge.calculateExchangeRate('ETH', 'XRP')
+console.log(`1 ETH = ${rate} XRP`)
 
-# Create escrow
-tx_hash = eth_manager.create_escrow(params)
-
-# Withdraw from escrow
-tx_hash = eth_manager.withdraw_escrow(secret, order_hash, xrpl_tx_hash)
-
-# Get escrow status
-status = eth_manager.get_escrow_status(order_hash)
+// Calculate destination amount
+const ethAmount = parseEther('0.01')
+const xrpAmount = await bridge.calculateDestinationAmount(
+  ethAmount,
+  'ETH',
+  'XRP'
+)
 ```
 
-### XrplUsdcManager
+## Exchange Rate Sources
 
-Manages XRPL USDC payments.
+### 1. 1inch Limit Order Protocol (Primary)
 
-```python
-from src.xrpl_usdc_manager import XrplUsdcManager
-import xrpl
+The system prioritizes real market rates from 1inch's LOP:
 
-wallet = xrpl.Wallet.from_seed(seed)
-xrpl_manager = XrplUsdcManager(rpc_url, wallet)
-
-# Send USDC payment
-tx_hash = xrpl_manager.send_usdc_payment(destination, amount)
-
-# Check USDC balance
-balance = xrpl_manager.check_usdc_balance(account)
+```typescript
+// LOP provides real-time market rates
+const lopRate = await lopIntegration.getMarketRate('ETH', 'USDC')
+// Example: 1 ETH = 2500 USDC (real market rate)
 ```
 
-## 🔒 Security Considerations
+### 2. Hardcoded Rates (Fallback)
 
-### Smart Contract Security
-- ✅ **Reentrancy Protection** - Uses OpenZeppelin's ReentrancyGuard
-- ✅ **Access Control** - Only authorized parties can call functions
-- ✅ **Time Locks** - Built-in timeouts for all operations
-- ✅ **Safety Deposits** - Economic incentives prevent malicious behavior
+When LOP is unavailable, the system uses hardcoded rates:
 
-### Operational Security
-- 🔑 **Private Key Management** - Store private keys securely
-- 🌐 **Network Selection** - Use testnets for development
-- 💰 **Amount Limits** - Start with small amounts for testing
-- ⏰ **Timelock Validation** - Verify timeout parameters
+```typescript
+const rates = {
+  'ETH': { 'XRP': 1800, 'USDC': 2500 },
+  'USDC': { 'XRP': 0.72, 'ETH': 0.0004 },
+  'XRP': { 'ETH': 0.00056, 'USDC': 1.39 }
+}
+```
 
-### User Validation Process
-Users must validate the following before sharing their secret:
-1. **XRPL Payment Exists** - Check transaction hash on XRPL
-2. **Correct Amount** - Verify USDC amount matches expectation
-3. **Correct Destination** - Confirm payment goes to user's address
-4. **Correct Token** - Ensure it's USDC from correct issuer
+### 3. Rate Caching
 
-## 🐛 Troubleshooting
+Rates are cached for 1 minute to improve performance:
+
+```typescript
+// First call: fetches from LOP
+const rate1 = await bridge.calculateExchangeRate('ETH', 'XRP')
+
+// Second call within 1 minute: uses cache
+const rate2 = await bridge.calculateExchangeRate('ETH', 'XRP')
+// rate1 === rate2 (cached)
+```
+
+## API Reference
+
+### XrplBridge Class
+
+```typescript
+class XrplBridge {
+  // Calculate exchange rate (LOP + fallback)
+  calculateExchangeRate(sourceToken: string, destinationToken: string): Promise<number>
+  
+  // Calculate destination amount with fees
+  calculateDestinationAmount(sourceAmount: bigint, sourceToken: string, destinationToken: string): Promise<bigint>
+  
+  // Execute XRPL transfer
+  sendXrp(fromWallet: XrplWallet, toAddress: string, amount: string): Promise<{hash: string, ledgerIndex: number}>
+  
+  // Verify XRPL transaction
+  verifyTransaction(transactionHash: string, expectedAmount: string, expectedDestination: string): Promise<boolean>
+  
+  // Create proof for cross-chain verification
+  createProof(transactionHash: string): Promise<XrplProof>
+}
+```
+
+### LOPIntegration Class
+
+```typescript
+class LOPIntegration {
+  // Get best quote from LOP
+  getBestQuote(sourceToken: string, targetToken: string, amount: bigint): Promise<LOPQuote | null>
+  
+  // Execute LOP order
+  executeQuote(quote: LOPQuote, wallet: Wallet): Promise<{success: boolean, txHash?: string}>
+  
+  // Get market rate from LOP
+  getMarketRate(sourceToken: string, targetToken: string): Promise<number>
+}
+```
+
+## Testing
+
+### Test Structure
+
+```bash
+tests/
+├── eth-xrpl.spec.ts          # Main cross-chain tests
+├── config.ts                  # Test configuration
+├── wallet.ts                  # Ethereum wallet utilities
+└── escrow-factory.ts         # Escrow factory utilities
+```
+
+### Running Specific Tests
+
+```bash
+# Test exchange rate calculations
+pnpm test -- --testNamePattern="Exchange Rate Calculations"
+
+# Test LOP integration
+pnpm test -- --testNamePattern="LOP Integration"
+
+# Test XRPL transfers
+pnpm test -- --testNamePattern="ETH to XRPL Transfer"
+```
+
+## Troubleshooting
 
 ### Common Issues
 
-#### 1. Contract Compilation Errors
-```bash
-# Install OpenZeppelin contracts
-forge install OpenZeppelin/openzeppelin-contracts
+1. **LOP Rate Unavailable**
+   ```
+   Warning: LOP rate not available, falling back to hardcoded rates
+   ```
+   - Check LOP contract address
+   - Verify network connectivity
+   - Ensure token addresses are correct
 
-# Clean and rebuild
-forge clean
-forge build
-```
+2. **XRPL Connection Failed**
+   ```
+   Error: Failed to connect to XRPL testnet
+   ```
+   - Check XRPL server URL
+   - Verify network connectivity
+   - Try alternative XRPL testnet endpoints
 
-#### 2. RPC Connection Issues
-```bash
-# Test connection
-curl -X POST -H "Content-Type: application/json" \
-  --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
-  YOUR_ETH_RPC_URL
-```
-
-#### 3. XRPL Connection Issues
-- Ensure XRPL RPC URL is correct
-- Check wallet seed format
-- Verify network (testnet vs mainnet)
-
-#### 4. Transaction Failures
-- Check gas limits and prices
-- Verify account has sufficient balance
-- Confirm contract addresses are correct
+3. **Rate Cache Issues**
+   ```
+   Error: Exchange rate not available
+   ```
+   - Clear rate cache
+   - Check token symbol mapping
+   - Verify fallback rates are configured
 
 ### Debug Mode
-```bash
-# Enable debug logging
-export DEBUG=1
-python src/main.py
+
+Enable debug logging:
+
+```typescript
+// In your test or application
+process.env.DEBUG = 'xrpl:bridge,lop:integration'
 ```
 
-### Getting Help
+## Contributing
 
-1. **Check Logs** - Review console output for error details
-2. **Run Tests** - Verify your setup with `python -m pytest tests/ -v`
-3. **Check Configuration** - Use option 5 in main menu
-4. **Review Deployment** - Check `deployment.json` for contract addresses
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
-## 🤝 Contributing
+## License
 
-### Development Setup
-```bash
-# Install development dependencies
-pip install -r requirements.txt
-pip install pytest pytest-cov black flake8
-
-# Run linting
-black src/ tests/
-flake8 src/ tests/
-
-# Run tests with coverage
-python -m pytest tests/ --cov=src --cov-report=html
-```
-
-### Project Structure
-```
-Xinch/
-├── contracts/           # Solidity smart contracts
-│   ├── BaseEscrow.sol
-│   └── UsdcEthXrplEscrow.sol
-├── src/                # Python source code
-│   ├── main.py         # Main CLI interface
-│   ├── eth_manager.py  # Ethereum interactions
-│   ├── xrpl_usdc_manager.py  # XRPL interactions
-│   ├── usdc_resolver.py     # Cross-chain logic
-│   └── usdc_validator.py    # Validation utilities
-├── tests/              # Test files
-├── scripts/            # Utility scripts
-└── docs/              # Documentation
-```
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **1inch Network** - For the original cross-chain swap implementation
-- **OpenZeppelin** - For secure smart contract libraries
-- **XRPL Foundation** - For XRPL integration libraries
-- **Ethereum Foundation** - For Web3 tools and infrastructure
-
----
-
-**⚠️ Disclaimer**: This is experimental software. Use at your own risk and never use with funds you cannot afford to lose. Always test thoroughly on testnets before using on mainnet. 
+MIT License - see LICENSE file for details.

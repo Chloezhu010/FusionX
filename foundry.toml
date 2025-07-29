@@ -1,31 +1,13 @@
 [profile.default]
-src = "contracts"
-out = "out"
-libs = ["lib"]
-remappings = [
-    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",  
-]
+solc = "0.8.23"
+src = 'contracts/src'
+out = 'dist/contracts'
+libs = ['contracts/lib']
 
-# Solidity compiler settings
-solc_version = "0.8.23"
-optimizer = true
-optimizer_runs = 200
-via_ir = false
+via_ir = true
+optimizer_runs = 1000000
+eth-rpc-url = 'http://localhost:8545'
 
-# EVM version
-evm_version = "paris"
+fs_permissions = [{ access = "read", path = "dist/contracts" }, { access = "read-write", path = ".forge-snapshots/" }]
 
-# Test settings
-verbosity = 2
-
-# Gas reporting
-gas_reports = ["*"]
-
-# Formatter settings
-line_length = 120
-tab_width = 4
-bracket_spacing = true
-
-# Documentation
-auto_detect_solc = false 
+extra_output = ['storageLayout']

@@ -1,1 +1,0 @@
-# Xinch source package for cross-chain USDC swaps 
