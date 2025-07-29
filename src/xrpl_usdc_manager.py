@@ -99,11 +99,13 @@ class XrplUsdcManager:
                 print(f"⚠️  Could not verify XRPL payment: {e}")
                 return False
 
-    def _format_usdc_amount(self, amount: int) -> str:
-        """Format amount for XRPL USDC - returns formatted string"""
-        # Convert amount from drops (6 decimal places) to formatted string
-        amount_float = amount / 1_000_000
-        return f"{amount_float:.6f}"
+    def _format_usdc_amount(self, amount: str) -> dict:
+        """Format amount for XRPL USDC"""
+        return {
+            "currency": self.USDC_CURRENCY,
+            "issuer": self.USDC_ISSUER,
+            "value": amount
+        }
 
     async def check_usdc_balance(self, account: str) -> str:
         """Check USDC balance for an account"""
