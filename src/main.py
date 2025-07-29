@@ -115,10 +115,10 @@ async def example_eth_to_xrpl_swap():
             'xrpl_amount': xrpl_amount_str,
             'safety_deposit': int(0.01 * 10**18),  # 0.01 ETH safety deposit
             'timelocks': {
-                'src_withdrawal': current_time + 30,    # 30 seconds (demo)
-                'src_cancellation': current_time + 7200, # 2 hours
-                'dst_withdrawal': current_time + 15,     # 15 seconds (demo)
-                'dst_cancellation': current_time + 3600  # 1 hour
+                'src_withdrawal': current_time + 15,
+                'src_cancellation': current_time + 10,
+                'dst_withdrawal': current_time + 15,
+                'dst_cancellation': current_time + 10
             }
         }
         
@@ -259,10 +259,10 @@ async def interactive_swap():
             'xrpl_amount': xrpl_amount_str,
             'safety_deposit': int(0.01 * 10**18),
             'timelocks': {
-                'src_withdrawal': current_time + 600,
-                'src_cancellation': current_time + 7200,
-                'dst_withdrawal': current_time + 300,
-                'dst_cancellation': current_time + 3600
+                'src_withdrawal': current_time + 15,
+                'src_cancellation': current_time + 10,
+                'dst_withdrawal': current_time + 15,
+                'dst_cancellation': current_time + 10
             }
         }
         
