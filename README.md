@@ -42,7 +42,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Chloezhu010/FusionX.git
 cd FusionX
 ```
 
