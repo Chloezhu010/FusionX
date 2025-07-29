@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # scripts/deploy.py
 """
-Deployment script for Xinch USDC escrow contracts
+Deployment script for FusionX USDC escrow contracts
 """
 
 import os
@@ -172,7 +172,7 @@ def save_deployment_info(contract_address: str, oracle_address: str, network: st
 def main():
     """Main deployment function"""
     
-    print("🚀 Xinch Contract Deployment")
+    print("🚀 FusionX Contract Deployment")
     print("=" * 50)
     
     # Load configuration

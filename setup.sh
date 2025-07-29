@@ -120,7 +120,7 @@ if [[ ! -d ".git" ]]; then
 fi
 
 print_info "Installing/updating OpenZeppelin contracts..."
-if forge install OpenZeppelin/openzeppelin-contracts --no-commit; then
+if forge install OpenZeppelin/openzeppelin-contracts; then
     print_status "OpenZeppelin contracts installed."
 else
     print_error "Failed to install OpenZeppelin contracts with forge."
@@ -172,9 +172,9 @@ ESCROW_CONTRACT_ADDRESS=
 XRPL_RPC_URL=wss://s.altnet.rippletest.net:51233
 XRPL_WALLET_SEED=sYOUR_XRPL_WALLET_SEED_HERE
 
-# Token Addresses
-ETH_USDC_ADDRESS=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-XRPL_USDC_ISSUER=rcEGREd5YGXK2grCkeSNRZm2Diq1Hp5jk
+# Token Testnet Addresses
+ETH_USDC_ADDRESS=0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+XRPL_USDC_ISSUER=rHuGNhqTG32mfmAvWA8hUyWRLV3tCSwKQt
 EOF
         print_status "Created basic .env file"
         print_warning "Please edit .env file with your actual configuration"
