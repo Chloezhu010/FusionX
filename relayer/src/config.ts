@@ -10,7 +10,7 @@ function getEnvVariable(key: string): string {
 
 export const config = {
     ethereum: {
-        nodeUrl: getEnvVariable('ETHEREUM_NODE_URL'),
+        nodeWsUrl: getEnvVariable('ETHEREUM_NODE_WS_URL'),
         escrowFactoryAddress: getEnvVariable('ESCROW_FACTORY_ADDRESS'),
     },
     xrpl: {

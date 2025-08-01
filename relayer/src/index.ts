@@ -9,7 +9,7 @@ const escrowFactoryAbi = [
 async function main() {
     console.log('Starting relayer...');
 
-    const provider = new ethers.JsonRpcProvider(config.ethereum.nodeUrl);
+    const provider = new ethers.WebSocketProvider(config.ethereum.nodeWsUrl);
     const escrowFactory = new ethers.Contract(config.ethereum.escrowFactoryAddress, escrowFactoryAbi, provider);
 
     console.log(`Listening for SrcEscrowCreated events on ${config.ethereum.escrowFactoryAddress}`);
