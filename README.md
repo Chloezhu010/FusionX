@@ -1,6 +1,6 @@
 # FusionX: ETH <> XRPL Cross-Chain Swap
 
-This project implements cross-chain swaps between Ethereum Sepolia testnet and XRPL testnet using escrow contracts and XRPL bridge functionality.
+This project implements cross-chain swaps between Base Sepolia testnet and XRPL testnet using escrow contracts and XRPL bridge functionality.
 
 ## 🚀 Quick Start
 
@@ -70,7 +70,7 @@ pnpm test
 ```
 
 ### TODO
-- only support eth on sepolia to xrp on xrpl testnet
+- only support eth on base sepolia to xrp on xrpl testnet
 - currently hard coded exchange rate
 
 ## 🏗️ Architecture

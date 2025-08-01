@@ -132,3 +132,7 @@ dist
 
 cache
 .idea
+
+# Claude AI conversation files
+Claude.md
+*.claude.md
