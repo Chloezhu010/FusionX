@@ -68,17 +68,22 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
 
     const relayerWallet = Wallet.fromSeed(config.xrpl.relayerWalletSeed);
 
-    // For now, use a simple timeout (in production, extract from timelocks)
-    const finishAfter = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+    // For demo purposes, make escrow finishable immediately (add 15 seconds)
+    const finishAfter = Math.floor(Date.now() / 1000) + 15; // 15 seconds from now
 
+
+    // Convert hashlock to proper XRPL crypto-condition format
+    // XRPL expects: A0 22 80 20 [32-byte hash]
+    const conditionPrefix = 'A0228020';
+    const hashlockBytes = hashlock.slice(2); // Remove 0x prefix
+    const condition = conditionPrefix + hashlockBytes.toUpperCase();
 
     const escrowCreateTx: EscrowCreate = {
         TransactionType: 'EscrowCreate',
         Account: relayerWallet.classicAddress,
         Amount: xrpToDrops(xrpAmount),
         Destination: config.xrpl.destinationAddress,
-        // Temporarily remove Condition to test basic escrow creation
-        // TODO: Add proper crypto-condition format later
+        Condition: condition,
         FinishAfter: finishAfter,
         Memos: [
             {
@@ -103,10 +108,26 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
         const prepared = await xrplClient.autofill(escrowCreateTx);
         const signed = relayerWallet.sign(prepared);
         console.log(`Submitting XRPL transaction: ${signed.tx_blob}`);
-        const result = await xrplClient.submitAndWait(signed.tx_blob);
-        console.log('XRPL Transaction Result:', result);
+        
+        console.log('📡 Submitting XRPL transaction (fire-and-forget)...');
+        
+        // Use submit instead of submitAndWait to avoid hanging on testnet
+        const result = await xrplClient.submit(signed.tx_blob);
+        console.log('✅ XRPL Transaction submitted:', result);
+        
+        if (result.result.engine_result === 'tesSUCCESS') {
+            console.log('🎉 XRPL Escrow transaction accepted by network!');
+            console.log('💡 Transaction hash:', result.result.tx_json.hash);
+            console.log('🔗 Check status at: https://testnet.xrpl.org/transactions/' + result.result.tx_json.hash);
+        } else if (result.result.engine_result === 'terQUEUED') {
+            console.log('⏳ Transaction queued, will be processed when network is ready');
+        } else {
+            console.log('❌ Transaction failed:', result.result.engine_result);
+            console.log('📝 Error message:', result.result.engine_result_message);
+        }
     } catch (error) {
-        console.error("Error submitting XRPL transaction:", error);
+        console.error("❌ Error submitting XRPL transaction:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
     }
 
 
