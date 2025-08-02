@@ -44,7 +44,7 @@ contract CreateRealCrossChainOrder is Script {
 
         IEscrowFactory.DstImmutablesComplement memory dstImmutables = IEscrowFactory.DstImmutablesComplement({
             maker: Address.wrap(uint160(maker)),
-            amount: 17 * 1e5, // 1.7 XRP (17 * 10^5 drops = 1,700,000 drops = 1.7 XRP)
+            amount: 18 * 1e5, // 1.7 XRP (17 * 10^5 drops = 1,700,000 drops = 1.7 XRP)
             token: Address.wrap(uint160(address(0))), // Native XRP on XRPL
             safetyDeposit: 0.001 ether,
             chainId: 1440002 // XRPL testnet chain ID

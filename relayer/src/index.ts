@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { Client, Wallet, xrpToDrops, EscrowCreate } from 'xrpl';
 import { config } from './config';
+const cc = require('five-bells-condition');
 
 const escrowFactoryAbi = [
     "event SrcEscrowCreated((bytes32,bytes32,uint256,uint256,uint256,uint256,uint256,uint256) srcImmutables, (uint256,uint256,uint256,uint256,uint256) dstImmutablesComplement)"
@@ -72,11 +73,24 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
     const finishAfter = Math.floor(Date.now() / 1000) + 15; // 15 seconds from now
 
 
-    // Convert hashlock to proper XRPL crypto-condition format
-    // XRPL expects: A0 22 80 20 [32-byte hash]
-    const conditionPrefix = 'A0228020';
-    const hashlockBytes = hashlock.slice(2); // Remove 0x prefix
-    const condition = conditionPrefix + hashlockBytes.toUpperCase();
+    // Create proper crypto-condition using five-bells-condition library
+    // We need to use the secret (orderHash) to generate a proper preimage condition
+    const secret = orderHash; // The orderHash IS the secret used for the condition
+    const secretBuffer = Buffer.from(secret.slice(2), 'hex');
+    
+    // Create preimage condition using correct API
+    const preimageCondition = new cc.PreimageSha256();
+    preimageCondition.setPreimage(secretBuffer);
+    
+    // Generate the condition binary and encode to hex (XRPL expects hex, not base64)
+    const conditionBinary = preimageCondition.getConditionBinary();
+    const condition = conditionBinary.toString('hex').toUpperCase();
+    
+    console.log('🔐 Crypto-condition details:');
+    console.log('  Secret (hex):', secret);
+    console.log('  Hashlock (hex):', hashlock);
+    console.log('  Condition (hex):', condition);
+    console.log('  Condition length:', condition.length, 'chars');
 
     const escrowCreateTx: EscrowCreate = {
         TransactionType: 'EscrowCreate',
@@ -149,10 +163,10 @@ async function monitorXrplEscrowFinish() {
     });
     
     xrplClient.on('transaction', (data: any) => {
-        const tx = data.transaction;
+        const tx = data?.transaction;
         
         // Check if this is an EscrowFinish transaction involving our relayer
-        if (tx.TransactionType === 'EscrowFinish' && 
+        if (tx && tx.TransactionType === 'EscrowFinish' && 
             tx.Owner === 'rfNXwvo8vyPRD7Sd1ZYkF9wVc19uwzMWnW') { // Our relayer address
             
             console.log('🔑 EscrowFinish detected! Secret revealed!');
