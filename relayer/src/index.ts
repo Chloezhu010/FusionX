@@ -3,44 +3,68 @@ import { Client, Wallet, xrpToDrops, EscrowCreate } from 'xrpl';
 import { config } from './config';
 
 const escrowFactoryAbi = [
-    "event SrcEscrowCreated(tuple(bytes32 orderHash, bytes32 hashlock, address maker, address taker, address token, uint256 amount, uint128 safetyDeposit, tuple(uint40 deployedAt, uint40 srcWithdrawal, uint40 srcPublicWithdrawal, uint40 srcCancellation, uint40 srcPublicCancellation, uint40 dstWithdrawal, uint40 dstPublicWithdrawal, uint40 dstCancellation) timelocks) immutables, tuple(address maker, uint256 amount, address token, uint128 safetyDeposit, uint256 chainId) immutablesComplement)"
+    "event SrcEscrowCreated((bytes32,bytes32,uint256,uint256,uint256,uint256,uint256,uint256) srcImmutables, (uint256,uint256,uint256,uint256,uint256) dstImmutablesComplement)"
 ];
 
 async function main() {
     console.log('Starting relayer...');
 
     const provider = new ethers.WebSocketProvider(config.ethereum.nodeWsUrl);
+    
     const escrowFactory = new ethers.Contract(config.ethereum.escrowFactoryAddress, escrowFactoryAbi, provider);
 
     console.log(`Listening for SrcEscrowCreated events on ${config.ethereum.escrowFactoryAddress}`);
+    
+    // Debug: Check the event topic hash
+    const iface = new ethers.Interface(escrowFactoryAbi);
+    const eventTopic = iface.getEvent('SrcEscrowCreated')?.topicHash;
+    console.log('Expected event topic:', eventTopic);
+    console.log('Actual event topic from tx: 0x0e534c62f0afd2fa0f0fa71198e8aa2d549f24daf2bb47de0d5486c7ce9288ca');
+    
+    // Test WebSocket by listening to new blocks (this will show if connection works)
+    provider.on('block', (blockNumber) => {
+        console.log(`📦 New block: ${blockNumber}`);
+    });
 
-    escrowFactory.on('SrcEscrowCreated', (immutables, immutablesComplement, event) => {
+    escrowFactory.on('SrcEscrowCreated', (srcImmutables, dstImmutablesComplement, event) => {
         console.log('--- New SrcEscrowCreated Event ---');
-        console.log('Immutables:', immutables);
-        console.log('Immutables Complement:', immutablesComplement);
+        console.log('🎉 EVENT DETECTED! 🎉');
+        console.log('Source Immutables:', srcImmutables);
+        console.log('Dest Immutables Complement:', dstImmutablesComplement);
         console.log('Transaction Hash:', event.log.transactionHash);
+        console.log('Order Hash:', srcImmutables[0]);
+        console.log('Hashlock:', srcImmutables[1]);
         console.log('---------------------------------');
 
-        handleXrplEscrowCreation(immutables, immutablesComplement);
+        handleXrplEscrowCreation(srcImmutables, dstImmutablesComplement);
     });
+    
+    // Add a simple test to verify the contract setup
+    console.log('🔍 Contract setup complete, waiting for events...');
 }
 
-async function handleXrplEscrowCreation(immutables: any, immutablesComplement: any) {
+async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplement: any) {
     console.log('--- Preparing XRPL Escrow ---');
 
-    // In a real implementation, you would need a mechanism to determine the XRP amount.
-    // This could be from the order, a price oracle, or a fixed rate.
-    // For now, we'll use a placeholder value.
-    const xrpAmount = "100"; // 100 XRP
+    // Extract data from the arrays
+    const orderHash = srcImmutables[0];
+    const hashlock = srcImmutables[1];
+    // Extract XRP amount from dstImmutablesComplement (in drops, convert to XRP)
+    const xrpDrops = Number(dstImmutablesComplement[1]);
+    const xrpAmount = (xrpDrops / 1000000).toString(); // Convert drops to XRP
+
+    console.log('📋 Cross-chain swap details:');
+    console.log('Order Hash:', orderHash);
+    console.log('Hashlock:', hashlock);
+    console.log('XRP Amount:', xrpAmount);
 
     const xrplClient = new Client(config.xrpl.nodeUrl);
     await xrplClient.connect();
 
     const relayerWallet = Wallet.fromSeed(config.xrpl.relayerWalletSeed);
 
-    // The Ripple Epoch is 946684800 seconds after the Unix Epoch.
-    const RIPPLE_EPOCH_OFFSET = 946684800;
-    const finishAfter = Number(immutables.timelocks.dstCancellation) - RIPPLE_EPOCH_OFFSET;
+    // For now, use a simple timeout (in production, extract from timelocks)
+    const finishAfter = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
 
     const escrowCreateTx: EscrowCreate = {
@@ -49,13 +73,13 @@ async function handleXrplEscrowCreation(immutables: any, immutablesComplement: a
         Amount: xrpToDrops(xrpAmount),
         Destination: config.xrpl.destinationAddress,
         // Condition must be a 64-character uppercase hex string
-        Condition: immutables.hashlock.slice(2).toUpperCase(),
+        Condition: hashlock.slice(2).toUpperCase(),
         FinishAfter: finishAfter,
         Memos: [
             {
                 Memo: {
-                    MemoType: ethers.hexlify(ethers.toUtf8Bytes('eth_tx_hash')),
-                    MemoData: ethers.hexlify(ethers.toUtf8Bytes(immutables.orderHash))
+                    MemoType: Buffer.from('eth_tx_hash').toString('hex').toUpperCase(),
+                    MemoData: orderHash.slice(2).toUpperCase()
                 }
             }
         ]
