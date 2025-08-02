@@ -41,6 +41,11 @@ async function main() {
     
     // Add a simple test to verify the contract setup
     console.log('🔍 Contract setup complete, waiting for events...');
+    
+    // Also start monitoring XRPL for EscrowFinish transactions
+    monitorXrplEscrowFinish().catch((error) => {
+        console.error('XRPL monitoring error:', error);
+    });
 }
 
 async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplement: any) {
@@ -72,14 +77,20 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
         Account: relayerWallet.classicAddress,
         Amount: xrpToDrops(xrpAmount),
         Destination: config.xrpl.destinationAddress,
-        // Condition must be a 64-character uppercase hex string
-        Condition: hashlock.slice(2).toUpperCase(),
+        // Temporarily remove Condition to test basic escrow creation
+        // TODO: Add proper crypto-condition format later
         FinishAfter: finishAfter,
         Memos: [
             {
                 Memo: {
                     MemoType: Buffer.from('eth_tx_hash').toString('hex').toUpperCase(),
                     MemoData: orderHash.slice(2).toUpperCase()
+                }
+            },
+            {
+                Memo: {
+                    MemoType: Buffer.from('hashlock').toString('hex').toUpperCase(),
+                    MemoData: hashlock.slice(2).toUpperCase()
                 }
             }
         ]
@@ -101,6 +112,55 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
 
     await xrplClient.disconnect();
     console.log('-----------------------------');
+}
+
+// NEW: Monitor XRPL for EscrowFinish transactions to extract revealed secrets
+async function monitorXrplEscrowFinish() {
+    console.log('🔍 Starting XRPL EscrowFinish monitor...');
+    
+    const xrplClient = new Client(config.xrpl.nodeUrl);
+    await xrplClient.connect();
+    
+    // Subscribe to all transactions to catch EscrowFinish
+    await xrplClient.request({
+        command: 'subscribe',
+        streams: ['transactions']
+    });
+    
+    xrplClient.on('transaction', (data: any) => {
+        const tx = data.transaction;
+        
+        // Check if this is an EscrowFinish transaction involving our relayer
+        if (tx.TransactionType === 'EscrowFinish' && 
+            tx.Owner === 'rfNXwvo8vyPRD7Sd1ZYkF9wVc19uwzMWnW') { // Our relayer address
+            
+            console.log('🔑 EscrowFinish detected! Secret revealed!');
+            console.log('Transaction:', tx);
+            
+            if (tx.Fulfillment) {
+                const revealedSecret = '0x' + tx.Fulfillment.toLowerCase();
+                console.log('✨ Revealed Secret:', revealedSecret);
+                
+                // TODO: Now use this secret to claim USDC on EVM side
+                handleSecretRevealed(revealedSecret, tx);
+            }
+        }
+    });
+    
+    console.log('👀 Monitoring XRPL for EscrowFinish transactions...');
+}
+
+async function handleSecretRevealed(secret: string, escrowFinishTx: any) {
+    console.log('🎯 Processing revealed secret for EVM withdrawal...');
+    console.log('Secret:', secret);
+    console.log('XRPL Tx Hash:', escrowFinishTx.hash);
+    
+    // TODO: Implement EVM escrow withdrawal using the revealed secret
+    // This would call the withdraw function on the EscrowSrc contract
+    console.log('📝 TODO: Implement EVM escrow withdrawal');
+    console.log('- Find corresponding EVM escrow by hashlock');
+    console.log('- Call withdraw() function with revealed secret');
+    console.log('- Claim USDC on Base Sepolia');
 }
 
 main().catch((error) => {

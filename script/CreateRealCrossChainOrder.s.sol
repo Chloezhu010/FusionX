@@ -22,10 +22,10 @@ contract CreateRealCrossChainOrder is Script {
         
         vm.startBroadcast(deployerPrivateKey);
         
-        // Step 1: Generate a real secret for HTLC
-        bytes32 secret = keccak256(abi.encodePacked("hackathon_secret_", block.timestamp, maker));
+        // Step 1: Use hardcoded secret for HTLC (easier for testing)
+        bytes32 secret = 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef;
         bytes32 hashlock = keccak256(abi.encodePacked(secret));
-        bytes32 orderHash = keccak256(abi.encodePacked("crosschain_order_", block.timestamp));
+        bytes32 orderHash = keccak256(abi.encodePacked("crosschain_order_fixed"));
         
         // Step 2: Create realistic timelocks for cross-chain swap
         Timelocks timelocks = TimelocksLib.setDeployedAt(Timelocks.wrap(0), uint256(block.timestamp));
