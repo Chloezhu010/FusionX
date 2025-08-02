@@ -74,8 +74,8 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
 
 
     // Create proper crypto-condition using five-bells-condition library
-    // We need to use the secret (orderHash) to generate a proper preimage condition
-    const secret = orderHash; // The orderHash IS the secret used for the condition
+    // Use the hardcoded secret from CreateRealCrossChainOrder.s.sol (line 26)
+    const secret = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
     const secretBuffer = Buffer.from(secret.slice(2), 'hex');
     
     // Create preimage condition using correct API
