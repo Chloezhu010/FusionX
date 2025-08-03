@@ -1,14 +1,28 @@
-# FusionX: ETH <> XRPL Cross-Chain Swap
+# FusionX: Base Sepolia ↔ XRPL Cross-Chain Atomic Swap
 
-This project implements cross-chain swaps between Base Sepolia testnet and XRPL testnet using escrow contracts and XRPL bridge functionality.
+This project implements **cross-chain atomic swaps** between Base Sepolia testnet and XRPL testnet using **Hash Time-Locked Contracts (HTLC)** with escrow contracts and crypto-conditions for trustless cross-chain swaps.
+
+## 🏆 Hackathon Implementation
+
+**Extend Fusion+ to XRP Ledger** - Built for the 1inch hackathon requirement to enable swaps between Ethereum and XRP Ledger while preserving hashlock and timelock functionality.
+
+### ✅ Features Implemented
+- **Bidirectional swaps**: Base Sepolia USDC ↔ XRPL XRP  
+- **Hash Time-Locked Contracts (HTLC)**: Atomic swap security using secrets and hashlocks
+- **Real escrow contracts**: Deployed on Base Sepolia with locked USDC
+- **XRPL crypto-conditions**: Proper five-bells-condition implementation
+- **Relayer service**: Automated cross-chain escrow creation
+- **Secret revelation**: Complete atomic swap cycle with withdrawal
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js >= 22
-- Foundry (for Solidity compilation)
-- XRPL testnet account
+- **Node.js >= 22**
+- **Foundry** (for Solidity compilation)
+- **XRPL testnet account** with funded XRP
+- **Base Sepolia testnet** ETH and USDC
+- **five-bells-condition** library for XRPL crypto-conditions
 
 ### Installation
 
@@ -17,9 +31,16 @@ This project implements cross-chain swaps between Base Sepolia testnet and XRPL 
 pnpm install
 ```
 
-2. **Install XRPL SDK (required for XRPL integration):**
+2. **Install required packages:**
 ```bash
+# XRPL SDK for XRPL integration
 pnpm add xrpl
+
+# Crypto-conditions for HTLC on XRPL
+npm install five-bells-condition
+
+# Ethers.js for Ethereum interaction
+npm install ethers dotenv
 ```
 
 3. **Install Foundry:**
@@ -42,10 +63,9 @@ cp .env.example .env
 
 2. **Update `.env` with your configuration:**
 ```bash
-# Ethereum Sepolia Configuration
-SRC_CHAIN_RPC=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
-SRC_CHAIN_CREATE_FORK=true
-SRC_CHAIN_PRIVATE_KEY=your_eth_private_key
+# Base Sepolia Configuration
+BASE_SEPOLIA_RPC=https://sepolia.base.org
+PRIVATE_KEY=your_base_sepolia_private_key
 
 # XRPL Testnet Configuration
 DST_CHAIN_RPC=wss://s.altnet.rippletest.net:51233
@@ -53,12 +73,11 @@ DST_CHAIN_CREATE_FORK=false
 DST_CHAIN_PRIVATE_KEY=your_xrpl_private_key
 
 # XRPL Test Accounts (seeds)
-XRPL_USER_SEED=sEdTM1uX8pu2do5XvTnutH6HsouMaM2
-XRPL_RESOLVER_SEED=sEdTMMv3qB8kYz6HgfuH4sQt8tLSMv
+XRPL_USER_SEED=s...
+XRPL_RESOLVER_SEED=s...
 ```
 
 ### Running Tests
-
 **ETH <> XRPL Cross-Chain Tests:**
 ```bash
 pnpm test tests/eth-xrpl.spec.ts
@@ -69,95 +88,30 @@ pnpm test tests/eth-xrpl.spec.ts
 pnpm test
 ```
 
-### TODO
-- only support eth on base sepolia to xrp on xrpl testnet
-- currently hard coded exchange rate
-
-## 🏗️ Architecture
-
-### Core Components
-
-1. **Resolver Contract** (`contracts/src/Resolver.sol`)
-   - Handles escrow deployment and XRPL bridge calls
-   - Replaces limit order protocol with XRPL bridge
-
-2. **XRPL Bridge** (`src/xrpl/bridge.ts`)
-   - Manages XRPL testnet connections
-   - Handles cross-chain transfers and proofs
-
-3. **XRPL Wallet Manager** (`src/xrpl/wallet.ts`)
-   - XRPL account creation and management
-   - Balance checking and funding
-
-### Cross-Chain Flow
-
-#### ETH → XRPL Transfer:
-1. User creates escrow on Ethereum
-2. Resolver calls XRPL bridge to initiate transfer
-3. Bridge sends XRP to destination address
-4. User can withdraw from escrow with secret
-
-#### XRPL → ETH Transfer:
-1. User sends XRP to bridge address on XRPL
-2. Bridge creates proof of transfer
-3. Resolver completes transfer on Ethereum
-4. User receives ETH in escrow
-
-## 🔧 Development
-
-### Adding New Features
-
-1. **XRPL Bridge Functions:**
-   - Add methods to `src/xrpl/bridge.ts`
-   - Update interface in `contracts/src/interfaces/IXrplBridge.sol`
-
-2. **New Token Support:**
-   - Update `tests/config.ts` with token addresses
-   - Add token-specific logic in bridge
-
-3. **Additional Chains:**
-   - Extend configuration in `tests/config.ts`
-   - Create new bridge implementation
-
-### Testing
-
-**Unit Tests:**
-```bash
-pnpm test tests/unit/
-```
-
-**Integration Tests:**
-```bash
-pnpm test tests/integration/
-```
-
-**XRPL Specific Tests:**
-```bash
-pnpm test tests/eth-xrpl.spec.ts
-```
-
 ## 📋 Configuration
 
 ### Chain Configuration
 
-**Ethereum Sepolia:**
-- Chain ID: 11155111
-- RPC: https://sepolia.infura.io/v3/YOUR_KEY
-- WETH: 0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9
-- USDC: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+**Base Sepolia:**
+- Chain ID: 84532
+- RPC: https://sepolia.base.org
+- Explorer: https://sepolia.basescan.org
+- Native: ETH (18 decimals)
+- USDC: Available on Base Sepolia
 
 **XRPL Testnet:**
 - Server: wss://s.altnet.rippletest.net:51233
 - Faucet: https://faucet.altnet.rippletest.net/accounts
+- Explorer: https://testnet.xrpl.org
 - Native: XRP (6 decimals)
 
 ### Environment Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `SRC_CHAIN_RPC` | Ethereum Sepolia RPC URL | `https://sepolia.infura.io/v3/...` |
+| `BASE_SEPOLIA_RPC` | Base Sepolia RPC URL | `https://sepolia.base.org` |
 | `DST_CHAIN_RPC` | XRPL testnet WebSocket URL | `wss://s.altnet.rippletest.net:51233` |
-| `SRC_CHAIN_PRIVATE_KEY` | Ethereum private key | `0xac...` |
+| `PRIVATE_KEY` | Base Sepolia private key | `0xac...` |
 | `DST_CHAIN_PRIVATE_KEY` | XRPL private key | `0x5d...` |
 | `XRPL_USER_SEED` | XRPL user wallet seed | `sEdT...` |
 | `XRPL_RESOLVER_SEED` | XRPL resolver wallet seed | `sEdTM...` |
@@ -212,10 +166,10 @@ Cannot find name 'process'
 **Solution:** Add to your `.env` file:
 ```bash
 # Make sure all required variables are set
-SRC_CHAIN_RPC=https://sepolia.infura.io/v3/YOUR_KEY
+BASE_SEPOLIA_RPC=https://sepolia.base.org
 DST_CHAIN_RPC=wss://s.altnet.rippletest.net:51233
-SRC_CHAIN_PRIVATE_KEY=your_eth_private_key
-DST_CHAIN_PRIVATE_KEY=your_eth_private_key_for_bridge
+PRIVATE_KEY=your_base_sepolia_private_key
+DST_CHAIN_PRIVATE_KEY=your_xrpl_private_key
 XRPL_USER_SEED=sEdTM1uX8pu2do5XvTnutH6HsouMaM2
 XRPL_RESOLVER_SEED=sEdTMMv3qB8kYz6HgfuH4sQt8tLSMv
 ```
