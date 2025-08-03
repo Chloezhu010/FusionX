@@ -70,7 +70,11 @@ async function handleXrplEscrowCreation(srcImmutables: any, dstImmutablesComplem
     const relayerWallet = Wallet.fromSeed(config.xrpl.relayerWalletSeed);
 
     // For demo purposes, make escrow finishable immediately (add 15 seconds)
-    const finishAfter = Math.floor(Date.now() / 1000) + 15; // 15 seconds from now
+    // const finishAfter = Math.floor(Date.now() / 1000) + 15; // 15 seconds from now
+    const RIPPLE_EPOCH_DIFF = 946684800; // seconds between 1970-01-01 and 2000-01-01
+    const unixNow = Math.floor(Date.now() / 1000);
+    const finishAfter = unixNow + 15 - RIPPLE_EPOCH_DIFF;
+    console.log('FinishAfter:', finishAfter);
 
 
     // Create proper crypto-condition using five-bells-condition library

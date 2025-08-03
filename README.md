@@ -157,10 +157,10 @@ pnpm test tests/eth-xrpl.spec.ts
 |----------|-------------|---------|
 | `SRC_CHAIN_RPC` | Ethereum Sepolia RPC URL | `https://sepolia.infura.io/v3/...` |
 | `DST_CHAIN_RPC` | XRPL testnet WebSocket URL | `wss://s.altnet.rippletest.net:51233` |
-| `SRC_CHAIN_PRIVATE_KEY` | Ethereum private key | `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80` |
-| `DST_CHAIN_PRIVATE_KEY` | XRPL private key | `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a` |
-| `XRPL_USER_SEED` | XRPL user wallet seed | `sEdTM1uX8pu2do5XvTnutH6HsouMaM2` |
-| `XRPL_RESOLVER_SEED` | XRPL resolver wallet seed | `sEdTMMv3qB8kYz6HgfuH4sQt8tLSMv` |
+| `SRC_CHAIN_PRIVATE_KEY` | Ethereum private key | `0xac...` |
+| `DST_CHAIN_PRIVATE_KEY` | XRPL private key | `0x5d...` |
+| `XRPL_USER_SEED` | XRPL user wallet seed | `sEdT...` |
+| `XRPL_RESOLVER_SEED` | XRPL resolver wallet seed | `sEdTM...` |
 
 ## 🚨 Important Notes
 
